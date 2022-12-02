@@ -1,0 +1,238 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">CATALOGOS DE SISTEMA</h5>
+			<p-table #dt1 [value]="catalogs" dataKey="moduleId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['catalogsPK.catalog','catalogsPK.itemId','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								CATÁLOGO
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="catalogsPK.catalog"
+                                                display="menu" 
+                                                placeholder="Buscar por Catálogo">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								ÍTEM ID
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="catalogsPK.itemId" 
+                                                display="menu" 
+                                                placeholder="Buscar por Ítem ID">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ÍTEM
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								DESCRIPCIÓN
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ACTIVO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="status" 
+                                                display="menu" 
+                                                placeholder="Buscar por activo">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-catalog let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{catalog.catalogsPK.catalog}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{catalog.catalogsPK.itemId}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{catalog.item}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{catalog.description}}
+						</td>
+                        <td style="min-width: 14rem;">
+                            <span *ngIf="catalog.status===1" [class]="'customer-badge status-qualified'">
+                                ACTIVO
+                            </span>
+                            <span *ngIf="catalog.status!==1" [class]="'customer-badge status-unqualified'">
+                                INACTIVO
+                            </span>
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar catalogo" (click)="editCatalog(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado catalgos del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando catalogs del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar catalogo" icon="pi pi-plus" class="mr-2 mb-2" (click)="createCatalog()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="catalogForm" (ngSubmit)="saveCatalog()">
+    <div class="user-profile">
+        <p-dialog header="{{newCatalog?'REGISTRO DE NUEVO CATALOG':'EDICION DE CATALOGO'}}" [(visible)]="showDlgCatalog" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}" 
+                  [closable]="false">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">             
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <div class="p-inputgroup">
+                                    <button type="button" 
+                                            pButton 
+                                            pRipple label="Generar" pTooltip="Asginar siguiente ID de catalogo"
+                                            (click)="getNextCatalogId()"
+                                            [disabled]="disabledGenerator">
+                                    </button>
+                                    <span class="p-float-label">
+                                        <input type="text" 
+                                            id="catalogId" 
+                                            pInputText 
+                                            formControlName="catalogId"
+                                            (ngModelChange)="manualCatalogId()">
+                                        <label for="catalogId">Catalogo</label>
+                                    </span>
+                                </div>
+                                <div *ngIf="newCatalog">
+                                    <ng-container *ngFor="let message of errorMessages.catalogId">
+                                        <div id="catalogIdErrors" class="error-message" *ngIf="catalogForm.get('catalogId').hasError(message.type)
+                                        && (catalogForm.get('catalogId').dirty || catalogForm.get('catalogId').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                                <div *ngIf="!newCatalog" id="daysOfValidityErrors" class="info-message">
+                                    <p-message severity="info" text="Esta asignacion no se puede modificar"></p-message>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="itemId" 
+                                            pInputText 
+                                            formControlName="itemId"
+                                            style="text-transform:uppercase">
+                                    <label for="itemId">Id del item</label>
+                                </span>
+                                <div id="daysOfValidityErrors" class="info-message">
+                                    <p-message severity="info" text="{{newCatalog?'Se asgina automaticamente al guardar':'Auto asignado, No se puede modificar'}}"></p-message>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="item"
+                                            pInputText 
+                                            formControlName="item"
+                                            style="text-transform:uppercase">
+                                    <label for="item">Item</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.item">
+                                        <div id="itemErrors" class="error-message" *ngIf="catalogForm.get('item').hasError(message.type)
+                                        && (catalogForm.get('item').dirty || catalogForm.get('item').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="description"
+                                            pInputText 
+                                            formControlName="description">
+                                    <label for="description">Descripción</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.description">
+                                        <div id="descriptionErrors" class="error-message" *ngIf="catalogForm.get('description').hasError(message.type)
+                                        && (catalogForm.get('description').dirty || catalogForm.get('description').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>        
+                    <div class="field col-12">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <p-toggleButton formControlName="status"
+                                                [offLabel]="'Catalogo inactivo'" 
+                                                [onLabel]="'Catalogo activo'"
+                                                [offIcon]="'pi pi-times'"
+                                                [onIcon]="'pi pi-refresh'">
+                                </p-toggleButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgCatalog=false; loadingTable=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!catalogForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

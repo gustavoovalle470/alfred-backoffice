@@ -1,0 +1,252 @@
+<form [formGroup]="formSelectLicenses">
+    <div class="field col-12 md:col-6">
+        <div class="grid p-fluid mt-3">
+            <div class="field col-12">
+                <span class="p-float-label">
+                    <p-dropdown [autoDisplayFirst]="preLoadCompany" 
+                                inputId="companyLicense" 
+                                [options]="companies" 
+                                optionLabel="name"
+                                optionValue="companyId"
+                                formControlName="company"
+                                (onChange)="putLicensesForCompany()"></p-dropdown>
+                    <label for="company">Empresa</label>
+                </span>
+            </div>
+        </div>
+    </div>
+    <h5 align="center" style="font-weight: bold;">LICENCIAS ASIGNADAS</h5>
+    <p-table [value]="licenseForCompany" dataKey="id" [expandedRowKeys]="expandedRows" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width: 3rem"></th>
+                <th pSortableColumn="id">ID <p-sortIcon field="id"></p-sortIcon></th>
+                <th pSortableColumn="start">FECHA INICIO <p-sortIcon field="start"></p-sortIcon></th>
+                <th> FECHA DE VENCIMIENTO </th>
+                <th pSortableColumn="daysOfValidity">VIGENCIA CONTRATADA <p-sortIcon field="daysOfValidity"></p-sortIcon></th>
+                <th> DÍAS RESTANTES </th>
+                <th pSortableColumn="autoRenoval">RENOVACIÓN AUTOMÁTICA <p-sortIcon field="autoRenoval"></p-sortIcon></th>
+                <th> ACCIONES </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-license let-expanded="expanded" let-index>
+            <tr>
+                <td>
+                    <button type="button" 
+                            pButton pRipple [pRowToggler]="license" class="p-button-text p-button-rounded p-button-plain" 
+                            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+                </td>
+                <td style="min-width: 12rem;">{{license.id}}</td>
+                <td style="min-width: 12rem;">{{license.start | date: 'dd/MM/yyyy'}}</td>
+                <td style="min-width: 12rem;">{{getFinalDate(license) | date: 'dd/MM/yyyy'}}</td>
+                <td style="min-width: 12rem;">{{license.daysOfValidity}}</td>
+                <td style="min-width: 12rem;">{{getLeftDays(license)}}</td>
+                <td style="min-width: 12rem;">
+                    <span *ngIf="license.autoRenoval===1" [class]="'customer-badge status-qualified'">
+                        SI
+                    </span>
+                    <span *ngIf="license.autoRenoval!==1" [class]="'customer-badge status-unqualified'">
+                        NO
+                    </span>
+                </td>
+                <td style="min-width: 12rem;">
+                    <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar licencia" (click)="editLicense(index)"></p-button>
+                </td>
+                
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="rowexpansion" let-license>
+            <tr>
+                <td colspan="7">
+                    <div class="p-3">
+                        <h5 align="center" style="font-weight: bold;">MODULOS ASIGNADOS</h5>
+                        <p-table [value]="license.modules" dataKey="id" responsiveLayout="scroll">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th pSortableColumn="moduleId">Id <p-sortIcon field="moduleId"></p-sortIcon></th>
+                                    <th pSortableColumn="name">NOMBRE <p-sortIcon field="name"></p-sortIcon></th>
+                                    <th> DESCRIPCION </th>
+                                    <th> ACCIONES </th>
+                                    <th style="width: 4rem"></th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-module>
+                                <tr>
+                                    <td>{{module.moduleId}}</td>
+                                    <td>{{module.name}}</td>
+                                    <td>{{module.descripcion}}</td>
+                                    <td>
+                                        <p-button type="button" class="mr-2 mb-2" icon="pi pi-times" pTooltip="Elimminar módulo" (click)="deleteModule(license, module)"></p-button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="6">No se han asignado módulos a esta licencia</td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="footer">
+                                <button pButton pRipple label="Adicionar modulo" icon="pi pi-plus" [disabled]="!selectedCompany" class="mr-2 mb-2" (click)="addModuleToLicense(license)"></button>    
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</form>
+<div align="center">
+    <button pButton pRipple label="Adicionar licencia" icon="pi pi-plus" [disabled]="!selectedCompany" class="mr-2 mb-2" (click)="createLicense()"></button>
+    <button pButton pRipple label="Regresar empresas" icon="pi pi-building" class="mr-2 mb-2" [routerLink]="['/alfred/companies']"></button>
+    <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+</div>
+<form [formGroup]="licensesForm" (ngSubmit)="saveLicense()">
+    <div class="user-profile">
+        <p-dialog header="{{newLicense?'REGISTRO DE NUEVA LICENCIA':'EDICION DE LICENCIA'}}" [(visible)]="showDlgLicense" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}"
+                  [closable]="false">
+            <div class="card">
+                <div class="field col-12">
+                    <div class="grid p-fluid mt-3">
+                        <div class="field col-12">
+                            <span class="p-float-label">
+                                <input type="text" 
+                                        id="licenseId" 
+                                        pInputText 
+                                        formControlName="licenseId"
+                                        readonly="true">
+                                <label for="licenseId">Identificador</label>
+                            </span>
+                            <div id="daysOfValidityErrors" class="info-message">
+                                <p-message severity="info" text="Se asgina automaticamente al guardar"></p-message>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-fluid p-formgrid grid">             
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="daysOfValidity" 
+                                            pInputText 
+                                            formControlName="daysOfValidity"
+                                            (ngModelChange)="calculateFinishDate()">
+                                    <label for="daysOfValidity">Duración (en días)</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.daysOfValidity">
+                                        <div id="daysOfValidityErrors" class="error-message" *ngIf="licensesForm.get('daysOfValidity').hasError(message.type)
+                                        && (licensesForm.get('daysOfValidity').dirty || licensesForm.get('daysOfValidity').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <p-toggleButton formControlName="autoRenoval"
+                                                [offLabel]="'Sin renovación automática'" 
+                                                [onLabel]="'Con renovación automática'"
+                                                [offIcon]="'pi pi-times'"
+                                                [onIcon]="'pi pi-refresh'">
+                                </p-toggleButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-calendar id = "startDate"
+                                                [showIcon]="true" 
+                                                inputId="icon"
+                                                formControlName="startDate"
+                                                appendTo="body">
+                                    </p-calendar>
+                                    <label for="startDate">Fecha de inicio vigencia</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.startDate">
+                                        <div id="startDateErrors" class="error-message" *ngIf="licensesForm.get('startDate').hasError(message.type)
+                                        && (licensesForm.get('startDate').dirty || licensesForm.get('startDate').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>         
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-calendar id = "finishDate"
+                                                [showIcon]="true" 
+                                                inputId="icon"
+                                                formControlName="finishDate">
+                                    </p-calendar>
+                                    <label for="finishDate">Fecha de finalización vigencia</label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>  
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgLicense=false; loadingTable = false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!licensesForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>
+<form [formGroup]="moduleForm" (ngSubmit)="saveModuleInLicense()">
+    <div id ="">
+        <p-dialog id="dlgAddModule" header="ADICION DE MODULO A LICENCIA" [(visible)]="showDlgAddModule" [resizable]="true"
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}"
+                  [closable]="false">
+            <div class="card">
+                <p>Seleccione un modulo de la siguiente lista y presione guardar, esto adicionará el acceso al modulo a la licencia</p>
+                <div class="grid p-fluid mt-3">
+                    <div class="field col-12">
+                        <span class="p-float-label">
+                            <p-multiSelect [options]="modulesOutOfLicense" 
+                                            optionLabel="name"
+                                            formControlName="modules"
+                                            display="chip"
+                                            [virtualScroll]="true"
+                                            appendTo="body">
+                            </p-multiSelect>
+                            <label for="modules">Módulo(s) a agregar</label>
+                        </span>
+                    </div>
+                    <div class="field col-12">
+                        <span class="p-float-label">
+                            <input type="text" 
+                                    id="licenseToAdd" 
+                                    pInputText 
+                                    formControlName="licenseToAdd"
+                                    readonly="true">
+                            <label for="licenseToAdd">Identificador de licencia</label>
+                        </span>
+                    </div>
+                </div>
+                <div class="field col-12">
+                    
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgAddModule=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!moduleForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

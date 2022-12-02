@@ -1,0 +1,309 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">EMPRESAS REGISTRADAS</h5>
+			<p-table #dt1 [value]="companies" dataKey="name" [rows]="10" 
+                    [loading]="loading" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['companyName','country.name','representative.name','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								EMPRESA
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="companyName" 
+                                                display="menu" 
+                                                placeholder="Buscar por nombre">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								LICENCIA
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="licenseId" 
+                                                display="menu" 
+                                                placeholder="Buscar por licencia">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								FECHA DE VENCIMIENTO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="date" 
+                                                field="expiredLicense" 
+                                                display="menu" 
+                                                placeholder="dd/mm/yyyy">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ESTADO LICENCIA
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="licenseStatus" 
+                                                display="menu" 
+                                                placeholder="Buscar por estado">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								USUARIOS EMPRESA
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-company let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{company.companyName}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{company.licenseId}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{company.expiredLicense | date: 'dd/MM/yyyy'}}
+						</td>
+                        <td style="min-width: 12rem;">
+							<span *ngIf="company.licenseStatus==='VALIDA'" [class]="'customer-badge status-qualified'">
+                                {{company.licenseStatus}}
+                            </span>
+                            <span *ngIf="company.licenseStatus!=='VALIDA'" [class]="'customer-badge status-unqualified'">
+                                {{company.licenseStatus}}
+                            </span>
+						</td>
+						<td style="min-width: 10rem;">
+							{{company.userCount}}
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar empresa" (click)="editCompany(index)"></p-button>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-wallet" pTooltip="Licencias" (click)="editLicense(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado empresas.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando empresas, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar empresa" icon="pi pi-plus" class="mr-2 mb-2" (click)="createCompany()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="companyForm" (ngSubmit)="saveCompany()">
+    <div class="user-profile">
+        <p-dialog header="{{newCompany?'REGISTRO DE NUEVA EMPRESA':'EDICION DE EMPRESA'}}" [(visible)]="showDialogCompany" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}"
+                  [closable]="true">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">             
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="companyName" 
+                                            pInputText 
+                                            formControlName="companyName"
+                                            style="text-transform:uppercase">
+                                    <label for="companyName">Nombre</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.companyName">
+                                        <div id="companyNameErrors" class="error-message" *ngIf="companyForm.get('companyName').hasError(message.type)
+                                        && (companyForm.get('companyName').dirty || companyForm.get('companyName').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="contactPhone" 
+                                            pInputText 
+                                            formControlName="contactPhone"
+                                            style="text-transform:uppercase">
+                                    <label for="contactPhone">Teléfono</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.contactPhone">
+                                        <div id="contactPhoneErrors" class="error-message" *ngIf="companyForm.get('contactPhone').hasError(message.type)
+                                        && (companyForm.get('contactPhone').dirty || companyForm.get('contactPhone').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-fluid p-formgrid grid">             
+                    <div class="field col-12">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="contactMail" 
+                                            pInputText 
+                                            formControlName="contactMail"
+                                            style="text-transform:uppercase">
+                                    <label for="contactMail">Correo electrónico</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.contactMail">
+                                        <div id="contactMailErrors" class="error-message" *ngIf="companyForm.get('contactMail').hasError(message.type)
+                                        && (companyForm.get('contactMail').dirty || companyForm.get('contactMail').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="companyMailAddress" 
+                                            pInputText 
+                                            formControlName="mailAddress"
+                                            style="text-transform:uppercase">
+                                    <label for="mailAddress">Dirección fisica</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.mailAddress">
+                                        <div id="mailAddressErrors" class="error-message" *ngIf="companyForm.get('mailAddress').hasError(message.type)
+                                        && (companyForm.get('mailAddress').dirty || companyForm.get('mailAddress').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>         
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="false" 
+                                                inputId="companyCountry" 
+                                                [options]="countries" 
+                                                optionLabel="country"
+                                                optionValue="countryId"
+                                                formControlName="country"
+                                                (onChange)="loadStates()"></p-dropdown>
+                                    <label for="country">País</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.country">
+                                        <div id="countryErrors" class="error-message" *ngIf="companyForm.get('country').hasError(message.type)
+                                        && (companyForm.get('country').dirty || companyForm.get('country').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="!newCompany" 
+                                                inputId="companyState" 
+                                                [options]="states" 
+                                                optionLabel="stateName"
+                                                optionValue="statesPK.id"
+                                                formControlName="state"
+                                                (onChange)="loadCities()"></p-dropdown>
+                                    <label for="state">Estado/Departamento</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.state">
+                                        <div id="stateErrors" class="error-message" *ngIf="companyForm.get('state').hasError(message.type)
+                                        && (companyForm.get('state').dirty || companyForm.get('state').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="!newCompany" 
+                                                inputId="companyCity" 
+                                                [options]="cities" 
+                                                optionLabel="city"
+                                                optionValue="cityId"
+                                                formControlName="principalCity"></p-dropdown>
+                                    <label for="principalCity">Ciudad</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.principalCity">
+                                        <div id="principalCityErrors" class="error-message" *ngIf="companyForm.get('principalCity').hasError(message.type)
+                                        && (companyForm.get('principalCity').dirty || companyForm.get('principalCity').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDialogCompany=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!companyForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>
+
+<p-toast key="tst" [baseZIndex]="99999"></p-toast>

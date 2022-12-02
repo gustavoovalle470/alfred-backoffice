@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/18b27cc8-9803-4128-b56b-ca7a3f29a486/AppServices/subscriptions/18b27cc8-9803-4128-b56b-ca7a3f29a486/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/alfred-backoffice",
+    "appService.deploySubpath": "."
+}

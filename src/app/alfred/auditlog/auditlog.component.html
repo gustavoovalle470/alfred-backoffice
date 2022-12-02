@@ -1,0 +1,274 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">LOGS DEL SISTEMA</h5>
+			<p-table #dt1 [value]="auditlogs" dataKey="moduleId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['name','country.name','representative.name','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ID
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="auditlogId" 
+                                                display="menu" 
+                                                placeholder="Buscar por ID">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								FECHA
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="operationDate" 
+                                                display="menu" 
+                                                placeholder="Buscar por fecha">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								USUARIO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="username.username" 
+                                                display="menu" 
+                                                placeholder="Buscar por usuario">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								SERVICIO INVOCADO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="wsinvoked" 
+                                                display="menu" 
+                                                placeholder="Buscar por servicio">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								OPERACIÓN INVOCADA
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="methodInvoked" 
+                                                display="menu" 
+                                                placeholder="Buscar por operacion">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ESTADO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="succesOperation" 
+                                                display="menu" 
+                                                placeholder="Buscar por estado">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-auditlog let-index>
+					<tr>
+						<td style="min-width: 14rem;">
+							{{auditlog.auditLogId}}
+						</td>
+                        <td style="min-width: 12rem;">
+							{{auditlog.operationDate | date:'dd/MM/yyyy HH:mm:ss'}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{auditlog.username?auditlog.username.username:"EJECUTADO POR EL SISTEMA."}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{auditlog.wsinvoked}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{auditlog.methodInvoked}}
+						</td>
+                        <td style="min-width: 14rem;">
+                            <span *ngIf="auditlog.succesOperation==='true'" [class]="'customer-badge status-qualified'">
+                                Exitosa
+                            </span>
+                            <span *ngIf="auditlog.succesOperation!=='true'" [class]="'customer-badge status-unqualified'">
+                                fallida
+                            </span>
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-eye" pTooltip="Ver detalles" (click)="viewOperation(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado logs del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando logs del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="auditlogForm">
+    <div class="user-profile">
+        <p-dialog header="DETALLE DE TRANSACCIÓN" [(visible)]="showDlgAuditlog" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}" 
+                  [closable]="false">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="auditLogId"
+                                            pInputText 
+                                            formControlName="auditLogId"
+                                            readonly="true">
+                                    <label for="auditLogId">Identificador</label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="wsinvoked"
+                                            pInputText 
+                                            formControlName="wsinvoked"
+                                            readonly="true">
+                                    <label for="wsinvoked">Servicio</label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="methodInvoked"
+                                            pInputText 
+                                            formControlName="methodInvoked"
+                                            readonly="true">
+                                    <label for="methodInvoked">Operación</label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="succesOperation"
+                                            pInputText 
+                                            formControlName="succesOperation"
+                                            readonly="true">
+                                    <label for="succesOperation">Estado de la operación</label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="operationDate"
+                                            pInputText 
+                                            formControlName="operationDate"
+                                            readonly="true">
+                                    <label for="operationDate">Fecha de operación</label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="username"
+                                            pInputText 
+                                            formControlName="username"
+                                            readonly="true">
+                                    <label for="username">Usuario</label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <textarea type="text" 
+                                              id="parametersInvoked"
+                                              rows="5"
+                                              pInputText 
+                                              formControlName="parametersInvoked"
+                                              readonly="true">
+                                    </textarea>
+                                    <label for="parametersInvoked">Parametros de invocación</label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <textarea type="text" 
+                                              id="responseMessage"
+                                              rows="5"
+                                              pInputText 
+                                              formControlName="responseMessage"
+                                              readonly="true">
+                                    </textarea>
+                                    <label for="responseMessage">Mensaje de respuesta</label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgAuditlog=false" label="Cerrar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

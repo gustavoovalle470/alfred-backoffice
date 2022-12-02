@@ -1,0 +1,419 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">USUARIOS DE SISTEMA</h5>
+			<p-table #dt1 [value]="users" dataKey="moduleId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['name','country.name','representative.name','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								USUARIO
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="username" 
+                                                display="menu" 
+                                                placeholder="Buscar por usuario">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ÚLTIMO CAMBIO DE CONTRASEÑA
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="date" 
+                                                field="lastPasswordChange" 
+                                                display="menu" 
+                                                placeholder="Buscar por fecha">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ÚLTIMO INICIO DE SESIÓN
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="date" 
+                                                field="lastLogin" 
+                                                display="menu" 
+                                                placeholder="Buscar por fecha">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								INTENTOS DE INICIO DE SESIÓN
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="number" 
+                                                field="triesToConnect" 
+                                                display="menu" 
+                                                placeholder="Buscar por intentos">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ESTADO OPERATIVO
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="userStatus.item" 
+                                                display="menu" 
+                                                placeholder="Buscar por estado">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-user let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{user.username}}
+						</td>
+                        <td style="min-width: 12rem;">
+							{{user.lastPasswordChange | date: 'dd/MM/yyyy'}}
+						</td>
+                        <td style="min-width: 12rem;">
+							{{user.lastPasswordChange | date: 'dd/MM/yyyy'}}
+						</td>
+                        <td style="min-width: 12rem;">
+							{{user.triesToConnect}}
+						</td>
+                        <td style="min-width: 12rem;">
+                            <span *ngIf="user.userStatus.item==='ACTIVO'" [class]="'customer-badge status-qualified'">
+                                {{user.userStatus.item}}
+                            </span>
+                            <span *ngIf="user.userStatus.item==='BLOQUEADO'" [class]="'customer-badge status-unqualified'">
+                                {{user.userStatus.item}}
+                            </span>
+                            <span *ngIf="user.userStatus.item==='USUARIO SISTEMA'" [class]="'customer-badge status-negotiation'">
+                                {{user.userStatus.item}}
+                            </span>
+                            <span *ngIf="user.userStatus.item==='RETIRADO'" [class]="'customer-badge status-renewal'">
+                                {{user.userStatus.item}}
+                            </span>
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar usuario" (click)="editUser(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado usuarios del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando usuarios del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar usuario" icon="pi pi-plus" class="mr-2 mb-2" (click)="createUser()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="userForm" (ngSubmit)="saveUser()">
+    <div class="user-profile">
+        <p-dialog header="{{newUser?'REGISTRO DE NUEVO USUARIO':'EDICION DE USUARIO'}}" [(visible)]="showDlgUser" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}" 
+                  [closable]="false">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">             
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="username" 
+                                            pInputText 
+                                            formControlName="username"
+                                            style="text-transform:uppercase">
+                                    <label for="username">Usuario</label>
+                                </span>
+                                <div id="daysOfValidityErrors" class="info-message">
+                                    <p-message severity="info" text="{{newUser?'Se asgina automaticamente al guardar':'Auto asignado, No se puede modificar'}}"></p-message>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <p-toggleButton formControlName="userSessionStatus"
+                                                [offLabel]="'Sesión de usuario cerrada'" 
+                                                [onLabel]="'Sesión de usuario abierta'"
+                                                [offIcon]="'pi pi-times'"
+                                                [onIcon]="'pi pi-refresh'"
+                                                (onChange)="doUserLogout()">
+                                </p-toggleButton>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="name" 
+                                            pInputText 
+                                            formControlName="name"
+                                            style="text-transform:uppercase">
+                                    <label for="name">Nombre</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.name">
+                                        <div id="nameErrors" class="error-message" *ngIf="userForm.get('name').hasError(message.type)
+                                        && (userForm.get('name').dirty || userForm.get('name').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="surname" 
+                                            pInputText 
+                                            formControlName="surname"
+                                            style="text-transform:uppercase">
+                                    <label for="surname">Apellido</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.surname">
+                                        <div id="surnameErrors" class="error-message" *ngIf="userForm.get('surname').hasError(message.type)
+                                        && (userForm.get('surname').dirty || userForm.get('surname').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="false"
+                                                inputId="idType" 
+                                                [options]="idTypes" 
+                                                optionLabel="item"
+                                                optionValue="catalogsPK.itemId"
+                                                formControlName="idType"
+                                                appendTo="body"></p-dropdown>
+                                    <label for="idType">Tipo documento</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.idType">
+                                        <div id="idTypeErrors" class="error-message" *ngIf="userForm.get('idType').hasError(message.type)
+                                        && (userForm.get('idType').dirty || userForm.get('idType').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                           id="document" 
+                                           pInputText
+                                           formControlName="document">
+                                    <label for="document">Documento</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.document">
+                                        <div id="documentErrors" class="error-message" *ngIf="userForm.get('document').hasError(message.type)
+                                        && (userForm.get('document').dirty || userForm.get('document').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                <p-dropdown [autoDisplayFirst]="false"
+                                            inputId="gender" 
+                                            [options]="genders" 
+                                            optionLabel="item"
+                                            optionValue="catalogsPK.itemId" 
+                                            formControlName="gender"
+                                            appendTo="body"></p-dropdown>
+                                    <label for="gender">Genero</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.gender">
+                                        <div id="genderErrors" class="error-message" *ngIf="userForm.get('gender').hasError(message.type)
+                                        && (userForm.get('gender').dirty || userForm.get('gender').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="email" 
+                                           id="email" 
+                                           pInputText 
+                                           formControlName="email"
+                                           [readonly]="!newUser"
+                                           style="text-transform:uppercase">
+                                    <label for="email">Correo electrónico</label>
+                                </span>
+                                <div *ngIf="!newUser" id="infoEmailNotEditable" class="info-message">
+                                    <p-message severity="info" text="No se puede modificar para este usuario."></p-message>
+                                </div>
+                                <div *ngIf="newUser">
+                                    <ng-container *ngFor="let message of errorMessages.email">
+                                        <div id="emailErrors" class="error-message" *ngIf="userForm.get('email').hasError(message.type)
+                                        && (userForm.get('email').dirty || userForm.get('email').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                        id="phone" 
+                                        pInputText 
+                                        formControlName="phone">
+                                    <label for="phone">Teléfono</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.phone">
+                                        <div id="phoneErrors" class="error-message" *ngIf="userForm.get('phone').hasError(message.type)
+                                        && (userForm.get('phone').dirty || userForm.get('phone').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                           id="address" 
+                                           pInputText 
+                                           formControlName="address">
+                                    <label for="address">Dirección</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.address">
+                                        <div id="addressErrors" class="error-message" *ngIf="userForm.get('address').hasError(message.type)
+                                        && (userForm.get('address').dirty || userForm.get('address').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                <p-dropdown [autoDisplayFirst]="false"
+                                            inputId="company" 
+                                            [options]="companies" 
+                                            optionLabel="name"
+                                            optionValue="companyId" 
+                                            formControlName="company"
+                                            appendTo="body"></p-dropdown>
+                                    <label for="company">Empresa</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.company">
+                                        <div id="companyErrors" class="error-message" *ngIf="userForm.get('company').hasError(message.type)
+                                        && (userForm.get('company').dirty || userForm.get('company').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                <p-dropdown [autoDisplayFirst]="false"
+                                            inputId="userStatus"
+                                            [options]="userStatus" 
+                                            optionLabel="item"
+                                            optionValue="catalogsPK.itemId" 
+                                            formControlName="userStatus"
+                                            appendTo="body"></p-dropdown>
+                                    <label for="userStatus">Tipo/Estado usuario</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.userStatus">
+                                        <div id="userStatusErrors" class="error-message" *ngIf="userForm.get('userStatus').hasError(message.type)
+                                        && (userForm.get('userStatus').dirty || userForm.get('userStatus').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgUser=false; loadingTable=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!userForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

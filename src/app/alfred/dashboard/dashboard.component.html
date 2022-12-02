@@ -1,0 +1,118 @@
+<form [formGroup]="changePasswordForm" (ngSubmit)="changePassword()">
+    <div class="user-profile">
+        <p-dialog header="{{userOnline? userOnline.username: ''}} - CAMBIO DE CONTRASEÑA" [(visible)]="showDlgChgPwd" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}"
+                  [closable]="passwordStatus?!passwordStatus.expired:true">
+            <div class="card">
+                <h5>{{passwordStatus && passwordStatus.expired?
+                      'Su contraseña expiro hace '+(passwordStatus?passwordStatus.daysToExpired:0)+' dias, por lo cual no cumple con las politicas de contraseña de ALFRED. Por favor cambiela en este momento.'
+                     :'Su contraseña vencerá en los próximos '+(passwordStatus?passwordStatus.daysToExpired:0)+', recuerde que su nueva contraseña deberá cumplir con las politicas de contraseña de ALFRED.'}}</h5>
+                <div class="field col-12">
+                    <div class="grid p-fluid">
+                        <div class="field col-12">
+                            <span class="p-float-label">
+                                <input type="password" 
+                                        id="oldPassword" 
+                                        pInputText 
+                                        formControlName="oldPassword">
+                                <label for="oldPassword">Contraseña anterior</label>
+                            </span>
+                            <div>
+                                <ng-container *ngFor="let message of errorMessages.oldPassword">
+                                    <div id="oldPasswordErrors" class="error-message" *ngIf="changePasswordForm.get('oldPassword').hasError(message.type)
+                                    && (changePasswordForm.get('oldPassword').dirty || changePasswordForm.get('oldPassword').touched)">
+                                        <p-message severity="error" text="{{message.message}}"></p-message>
+                                        <ion-icon name="information-circle-outline"></ion-icon>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field col-12">
+                    <div class="grid p-fluid">
+                        <div class="field col-12">
+                            <span class="p-float-label">
+                                <input type="password" 
+                                        id="newPassword" 
+                                        pInputText 
+                                        formControlName="newPassword">
+                                <label for="newPassword">Nueva contraseña</label>
+                            </span>
+                            <div>
+                                <ng-container *ngFor="let message of errorMessages.newPassword">
+                                    <div id="newPasswordErrors" class="error-message" *ngIf="changePasswordForm.get('newPassword').hasError(message.type)
+                                    && (changePasswordForm.get('newPassword').dirty || changePasswordForm.get('newPassword').touched)">
+                                        <p-message severity="error" text="{{message.message}}"></p-message>
+                                        <ion-icon name="information-circle-outline"></ion-icon>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field col-12">
+                    <div class="grid p-fluid ">
+                        <div class="field col-12">
+                            <span class="p-float-label">
+                                <input type="password" 
+                                        id="confirmPassword" 
+                                        pInputText 
+                                        formControlName="confirmPassword">
+                                <label for="confirmPassword">Confirmar nueva contraseña</label>
+                            </span>
+                            <div>
+                                <ng-container *ngFor="let message of errorMessages.confirmPassword">
+                                    <div id="confirmPasswordErrors" class="error-message" *ngIf="changePasswordForm.get('confirmPassword').hasError(message.type)
+                                    && (changePasswordForm.get('confirmPassword').dirty || changePasswordForm.get('confirmPassword').touched)">
+                                        <p-message severity="error" text="{{message.message}}"></p-message>
+                                        <ion-icon name="information-circle-outline"></ion-icon>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" [disabled]="passwordStatus?passwordStatus.expired:false" (click)="showDlgChgPwd=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!changePasswordForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>
+<p-toast key="tst" [baseZIndex]="99999"></p-toast>
+<div class="dashboard">
+    <div class="grid">
+        <div class="col-12 md:col-12 lg:col-4">
+            <div class="overview-box monthly-sales">
+                <div class="overview-title">ESTADO DE LOS SERVICIOS</div>
+                <div class="overview-ratios">Servicios activos: {{onlineServices}}</div>
+                <div class="overview-ratios">Servicios inactivos: {{inactiveServices}}</div>
+                <div class="overview-ratios">Servicios fuera de línea: {{offlineServices}}</div>
+                <div class="overview-ratios">Total servicios: {{services?services.length:0}}</div>
+                <img src="assets/dashboard/web-service-icon.png" alt="webservice" />
+            </div>
+        </div>
+        <div class="col-12 md:col-12 lg:col-4">
+            <div class="overview-box monthly-views">
+                <div class="overview-title">RESUMEN DE TRANSACCIONES</div>
+                <div class="overview-ratios">Transacciones exitosas: {{countOperations('true')}}</div>
+                <div class="overview-ratios">Transacciones fallidas: {{countOperations('false')}}</div>
+                <div class="overview-ratios">Total transacciones: {{auditlogs.length}} </div>
+                <img src="assets/dashboard/transation-icon.png" alt="transactions" />
+            </div>
+        </div>
+        <div class="col-12 md:col-12 lg:col-4">
+            <div class="overview-box monthly-users">
+                <div class="overview-title">ESTADO DE LOS USUARIOS</div>
+                <div class="overview-ratios">Usuarios conectados: {{openSessions}}</div>
+                <div class="overview-ratios">Usuarios bloqueados: {{getUserByStatus(3)}}</div>
+                <div class="overview-ratios">Usuarios inactivos: {{getUserByStatus(4)}}</div>
+                <div class="overview-ratios">Total usuarios: {{getUserByStatus(0)}}</div>
+                <img src="assets/dashboard/users-icon.png" alt="users" />
+            </div>
+        </div>
+     </div>
+</div>
+

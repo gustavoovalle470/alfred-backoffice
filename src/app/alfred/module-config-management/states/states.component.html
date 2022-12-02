@@ -1,0 +1,176 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">ESTADOS/DEPARTAMENTOS DE SISTEMA</h5>
+			<p-table #dt1 [value]="states" dataKey="moduleId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['statesPK.id','countries.country','stateName']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								ID
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="statesPK.id" 
+                                                display="menu" 
+                                                placeholder="Buscar por ID">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								PAÍS
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="countries.country" 
+                                                display="menu" 
+                                                placeholder="Buscar por País">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								NOMBRE
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="stateName" 
+                                                display="menu" 
+                                                placeholder="Buscar por nombre">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-state let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{state.statesPK.id}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{state.countries.country}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{state.stateName}}
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar estado" (click)="editState(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado estados/departamentos del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando estados/departamentos del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar estado" icon="pi pi-plus" class="mr-2 mb-2" (click)="createState()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="stateForm" (ngSubmit)="saveState()">
+    <div class="user-profile">
+        <p-dialog header="{{newState?'REGISTRO DE NUEVO ESTADO':'EDICION DE ESTADO'}}" [(visible)]="showDlgState" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}" 
+                  [closable]="false">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="stateId"
+                                            pInputText 
+                                            formControlName="stateId">
+                                    <label for="stateId">Id del estado</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.stateId">
+                                        <div id="stateIdErrors" class="error-message" *ngIf="stateForm.get('stateId').hasError(message.type)
+                                        && (stateForm.get('stateId').dirty || stateForm.get('stateId').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="false"
+                                                inputId="countryId" 
+                                                [options]="countries" 
+                                                optionLabel="country"
+                                                optionValue="countryId"
+                                                formControlName="countryId"
+                                                appendTo="body"></p-dropdown>
+                                    <label for="countryId">País</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.countryId">
+                                        <div id="countryIdErrors" class="error-message" *ngIf="stateForm.get('countryId').hasError(message.type)
+                                        && (stateForm.get('countryId').dirty || stateForm.get('countryId').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="stateName"
+                                            pInputText 
+                                            formControlName="stateName">
+                                    <label for="stateName">Nombre</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.stateName">
+                                        <div id="stateNameErrors" class="error-message" *ngIf="stateForm.get('stateName').hasError(message.type)
+                                        && (stateForm.get('stateName').dirty || stateForm.get('stateName').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgState=false; loadingTable=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!stateForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

@@ -1,0 +1,203 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">MODULOS DE SISTEMA</h5>
+			<p-table #dt1 [value]="modules" dataKey="moduleId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['name','country.name','representative.name','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								ID
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="moduleId" 
+                                                display="menu" 
+                                                placeholder="Buscar por ID">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								NOMBRE
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="name" 
+                                                display="menu" 
+                                                placeholder="Buscar por nombre">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								DESCRIPCIÓN
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ACTIVO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="active" 
+                                                display="menu" 
+                                                placeholder="Buscar por activo">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-module let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{module.moduleId}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{module.name}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{module.descripcion}}
+						</td>
+                        <td style="min-width: 14rem;">
+                            <span *ngIf="module.active===1" [class]="'customer-badge status-qualified'">
+                                ACTIVO
+                            </span>
+                            <span *ngIf="module.active!==1" [class]="'customer-badge status-unqualified'">
+                                INACTIVO
+                            </span>
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar módulo" (click)="editModule(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado módulos del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando módulos del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar configuracion" icon="pi pi-plus" class="mr-2 mb-2" (click)="createModule()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="moduleForm" (ngSubmit)="saveModule()">
+    <div class="user-profile">
+        <p-dialog header="{{newModule?'REGISTRO DE NUEVA CONFIGURACION':'EDICION DE CONFIGURACION'}}" [(visible)]="showDlgModule" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}" 
+                  [closable]="false">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">             
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="moduleId" 
+                                            pInputText 
+                                            formControlName="moduleId"
+                                            style="text-transform:uppercase">
+                                    <label for="moduleId">ID</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.moduleId">
+                                        <div id="moduleIdErrors" class="error-message" *ngIf="moduleForm.get('moduleId').hasError(message.type)
+                                        && (moduleForm.get('moduleId').dirty || moduleForm.get('moduleId').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="name" 
+                                            pInputText 
+                                            formControlName="name"
+                                            style="text-transform:uppercase">
+                                    <label for="name">Nombre</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.name">
+                                        <div id="nameErrors" class="error-message" *ngIf="moduleForm.get('name').hasError(message.type)
+                                        && (moduleForm.get('name').dirty || moduleForm.get('name').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="descripcion"
+                                            pInputText 
+                                            formControlName="descripcion"
+                                            style="text-transform:uppercase">
+                                    <label for="descripcion">Descripción</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.descripcion">
+                                        <div id="descripcionErrors" class="error-message" *ngIf="moduleForm.get('descripcion').hasError(message.type)
+                                        && (moduleForm.get('descripcion').dirty || moduleForm.get('descripcion').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>        
+                    <div class="field col-12">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <p-toggleButton formControlName="moduleStatus"
+                                                [offLabel]="'Módulo activo'" 
+                                                [onLabel]="'Módulo inactivo'"
+                                                [offIcon]="'pi pi-times'"
+                                                [onIcon]="'pi pi-refresh'">
+                                </p-toggleButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgModule=false; loadingTable=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!moduleForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

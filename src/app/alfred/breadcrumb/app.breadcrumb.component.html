@@ -1,0 +1,21 @@
+<div class="route-bar">
+    <div class="route-bar-breadcrumb">
+        <a href="/#/alfred/dashboard">
+            <i class="pi pi-home"></i>
+        </a>
+        <span>/ </span>
+        <ng-template ngFor let-item let-last="last" [ngForOf]="items">
+            <a [routerLink]="item.routerLink" *ngIf="item.routerLink">{{item.label}}</a>
+            <ng-container *ngIf="!item.routerLink">{{item.label}}</ng-container>
+            <span *ngIf="!last">/</span>
+        </ng-template>
+    </div>
+
+    <ul class="route-bar-menu">
+        <li>
+            <a pTooltip="Help" tooltipPosition="bottom">
+                <i class="pi pi-question-circle" ></i>
+            </a>
+        </li>
+    </ul>
+</div>

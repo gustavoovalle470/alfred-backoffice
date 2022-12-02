@@ -1,0 +1,245 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">PAISES DE SISTEMA</h5>
+			<p-table #dt1 [value]="countries" dataKey="moduleId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['name','country.name','representative.name','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								ID
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="countryId" 
+                                                display="menu" 
+                                                placeholder="Buscar por ID">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								PAÍS
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="country" 
+                                                display="menu" 
+                                                placeholder="Buscar por nombre">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ISO 2
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="iso2" 
+                                                display="menu" 
+                                                placeholder="Buscar por ISO2">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ISO 3
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="iso3" 
+                                                display="menu" 
+                                                placeholder="Buscar por ISO3">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								CÓDIGO TELEFÓNICO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="phoneCode" 
+                                                display="menu" 
+                                                placeholder="Buscar por codigo telefonico">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-country let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{country.countryId}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{country.country}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{country.iso2}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{country.iso3}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{country.phoneCode}}
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar país" (click)="editCountry(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado paises del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando paises del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar país" icon="pi pi-plus" class="mr-2 mb-2" (click)="createCountry()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="countryForm" (ngSubmit)="saveCountry()">
+    <div class="user-profile">
+        <p-dialog header="{{newCountry?'REGISTRO DE NUEVO PAIS':'EDICION DE PAIS'}}" [(visible)]="showDlgCountry" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}" 
+                  [closable]="false">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                        id="countryId" 
+                                        pInputText 
+                                        formControlName="countryId">
+                                    <label for="countryId">Identificador</label>
+                                </span>
+                                <div id="daysOfValidityErrors" class="info-message">
+                                    <p-message severity="info" text="{{newCountry?'Se asignará automaticamente al guardar':'Esta asignacion no se puede modificar'}}"></p-message>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="countryName"
+                                            pInputText 
+                                            formControlName="countryName"
+                                            style="text-transform:uppercase">
+                                    <label for="countryName">Nombre</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.countryName">
+                                        <div id="countryNameErrors" class="error-message" *ngIf="countryForm.get('countryName').hasError(message.type)
+                                        && (countryForm.get('countryName').dirty || countryForm.get('countryName').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="iso2"
+                                            pInputText 
+                                            formControlName="iso2"
+                                            style="text-transform:uppercase">
+                                    <label for="iso2">Codigo ISO2</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.iso2">
+                                        <div id="iso2Errors" class="error-message" *ngIf="countryForm.get('iso2').hasError(message.type)
+                                        && (countryForm.get('iso2').dirty || countryForm.get('iso2').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="iso3"
+                                            pInputText 
+                                            formControlName="iso3">
+                                    <label for="iso3">Codigo ISO3</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.iso3">
+                                        <div id="iso3Errors" class="error-message" *ngIf="countryForm.get('iso3').hasError(message.type)
+                                        && (countryForm.get('iso3').dirty || countryForm.get('iso3').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="phoneCode"
+                                            pInputText 
+                                            formControlName="phoneCode">
+                                    <label for="phoneCode">Codigo telefonico</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.phoneCode">
+                                        <div id="phoneCodeErrors" class="error-message" *ngIf="countryForm.get('phoneCode').hasError(message.type)
+                                        && (countryForm.get('phoneCode').dirty || countryForm.get('phoneCode').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgCountry=false; loadingTable=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!countryForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

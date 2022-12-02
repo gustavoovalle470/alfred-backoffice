@@ -1,0 +1,297 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">OPCIONES DE USUARIO DEL SISTEMA</h5>
+			<p-table #dt1 [value]="menulinks" dataKey="moduleId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['menuName','module.name','representative.name','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								NOMBRE
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="menuName" 
+                                                display="menu" 
+                                                placeholder="Buscar por nombre">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								MÓDULO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="module.name" 
+                                                display="menu" 
+                                                placeholder="Buscar por modulo">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								NODO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="node" 
+                                                display="menu" 
+                                                placeholder="Buscar por nodo">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ESTADO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="status" 
+                                                display="menu" 
+                                                placeholder="Buscar por estado">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								LINK
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="link" 
+                                                display="menu" 
+                                                placeholder="Buscar por link">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								EXPRESIÓN DE ICONO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="iconExpression" 
+                                                display="menu" 
+                                                placeholder="Buscar por expresión">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-menulink let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{menulink.menuName}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{menulink.module.name}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{menulink.node}}
+						</td>
+                        <td style="min-width: 14rem;">
+                            <span *ngIf="menulink.status===1" [class]="'customer-badge status-qualified'">
+                                Activo
+                            </span>
+                            <span *ngIf="menulink.status!==1" [class]="'customer-badge status-unqualified'">
+                                Inactivo
+                            </span>
+						</td>
+                        <td style="min-width: 14rem;">
+							{{menulink.link}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{menulink.iconExpression}}
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar opción" (click)="editMenulink(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado opciones de usuario del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando opciones de usuario del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar opcion de usuario" icon="pi pi-plus" class="mr-2 mb-2" (click)="createMenulink()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="menulinkForm" (ngSubmit)="saveMenulink()">
+    <div class="user-profile">
+        <p-dialog header="{{newMenulink?'REGISTRO DE NUEVA OPCION DE USUARIO':'EDICION DE OPCION DE USUARIO'}}" [(visible)]="showDlgMenulink" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}" 
+                  [closable]="false">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="menuName"
+                                            pInputText 
+                                            formControlName="menuName">
+                                    <label for="menuName">Nombre</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.menuName">
+                                        <div id="menuNameErrors" class="error-message" *ngIf="menulinkForm.get('menuName').hasError(message.type)
+                                        && (menulinkForm.get('menuName').dirty || menulinkForm.get('menuName').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="false"
+                                                inputId="module" 
+                                                [options]="modules" 
+                                                optionLabel="name"
+                                                optionValue="moduleId"
+                                                formControlName="module"
+                                                appendTo="body"></p-dropdown>
+                                    <label for="module">Modulo</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.module">
+                                        <div id="moduleErrors" class="error-message" *ngIf="menulinkForm.get('module').hasError(message.type)
+                                        && (menulinkForm.get('module').dirty || menulinkForm.get('module').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="false"
+                                                inputId="node" 
+                                                [options]="nodes" 
+                                                optionLabel="label"
+                                                optionValue="id"
+                                                formControlName="node"
+                                                appendTo="body"></p-dropdown>
+                                    <label for="node">Nodo</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.node">
+                                        <div id="nodeErrors" class="error-message" *ngIf="menulinkForm.get('node').hasError(message.type)
+                                        && (menulinkForm.get('node').dirty || menulinkForm.get('node').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <p-toggleButton formControlName="status"
+                                                [offLabel]="'Menu inactivo'" 
+                                                [onLabel]="'Menu activo'"
+                                                [offIcon]="'pi pi-times'"
+                                                [onIcon]="'pi pi-refresh'">
+                                </p-toggleButton>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.status">
+                                        <div id="statusErrors" class="error-message" *ngIf="menulinkForm.get('status').hasError(message.type)
+                                        && (menulinkForm.get('status').dirty || menulinkForm.get('status').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="link"
+                                            pInputText 
+                                            formControlName="link">
+                                    <label for="link">Link</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.link">
+                                        <div id="linkErrors" class="error-message" *ngIf="menulinkForm.get('link').hasError(message.type)
+                                        && (menulinkForm.get('link').dirty || menulinkForm.get('link').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="iconExpression"
+                                            pInputText 
+                                            formControlName="iconExpression">
+                                    <label for="iconExpression">Expresión de icono</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.iconExpression">
+                                        <div id="iconExpressionErrors" class="error-message" *ngIf="menulinkForm.get('iconExpression').hasError(message.type)
+                                        && (menulinkForm.get('iconExpression').dirty || menulinkForm.get('iconExpression').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgMenulink=false; loadingTable=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!menulinkForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

@@ -1,0 +1,218 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">CIUDADES DE SISTEMA</h5>
+			<p-table #dt1 [value]="cities" dataKey="moduleId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['name','country.name','representative.name','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								ID
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="cityId" 
+                                                display="menu" 
+                                                placeholder="Buscar por ID">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								CIUDAD
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="city" 
+                                                display="menu" 
+                                                placeholder="Buscar por nombre">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ESTADO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="states.stateName" 
+                                                display="menu" 
+                                                placeholder="Buscar por estado">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								PAÍS
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="states.countries.country" 
+                                                display="menu" 
+                                                placeholder="Buscar por pais">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-city let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{city.cityId}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{city.city}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{city.states.stateName}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{city.states.countries.country}}
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar estado" (click)="editCity(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado ciudades del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando Ciudades del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar ciudad" icon="pi pi-plus" class="mr-2 mb-2" (click)="createCity()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="cityForm" (ngSubmit)="saveCity()">
+    <div class="user-profile">
+        <p-dialog header="{{newCity?'REGISTRO DE NUEVA CIUDAD':'EDICION DE CIUDAD'}}" [(visible)]="showDlgCity" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}" 
+                  [closable]="false">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="cityId"
+                                            pInputText 
+                                            formControlName="cityId">
+                                    <label for="cityId">ID</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.cityId">
+                                        <div id="cityIdErrors" class="error-message" *ngIf="cityForm.get('cityId').hasError(message.type)
+                                        && (cityForm.get('cityId').dirty || cityForm.get('cityId').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="false"
+                                                inputId="countryId" 
+                                                [options]="countries" 
+                                                optionLabel="country"
+                                                optionValue="countryId"
+                                                formControlName="countryId"
+                                                (onChange)="getStatesByCountry()"
+                                                appendTo="body"></p-dropdown>
+                                    <label for="countryId">País</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.countryId">
+                                        <div id="countryIdErrors" class="error-message" *ngIf="cityForm.get('countryId').hasError(message.type)
+                                        && (cityForm.get('countryId').dirty || cityForm.get('countryId').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="false"
+                                                inputId="stateId" 
+                                                [options]="states" 
+                                                optionLabel="stateName"
+                                                optionValue="statesPK.id"
+                                                formControlName="stateId"
+                                                appendTo="body"></p-dropdown>
+                                    <label for="stateId">Estado/Departamento</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.stateId">
+                                        <div id="stateIdErrors" class="error-message" *ngIf="cityForm.get('stateId').hasError(message.type)
+                                        && (cityForm.get('stateId').dirty || cityForm.get('stateId').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="cityName"
+                                            pInputText 
+                                            formControlName="cityName">
+                                    <label for="cityName">Nombre</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.cityName">
+                                        <div id="cityNameErrors" class="error-message" *ngIf="cityForm.get('cityName').hasError(message.type)
+                                        && (cityForm.get('cityName').dirty || cityForm.get('cityName').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgCity=false; loadingTable=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!cityForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

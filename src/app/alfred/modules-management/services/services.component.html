@@ -1,0 +1,326 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">SERVICIOS DEL SISTEMA</h5>
+			<p-table #dt1 [value]="services" dataKey="moduleId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['name','country.name','representative.name','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								ID
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="id" 
+                                                display="menu" 
+                                                placeholder="Buscar por id">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								NOMBRE
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="name" 
+                                                display="menu" 
+                                                placeholder="Buscar por nombre">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								DESCRIPCIÓN
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								ESTADO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="active" 
+                                                display="menu" 
+                                                placeholder="Buscar por estado">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								HOST
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="host" 
+                                                display="menu" 
+                                                placeholder="Buscar por host">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								PUERTO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="port" 
+                                                display="menu" 
+                                                placeholder="Buscar por puerto">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								PATH
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="path" 
+                                                display="menu" 
+                                                placeholder="Buscar por path">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								MÓDULO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="moduleId.name" 
+                                                display="menu" 
+                                                placeholder="Buscar por modulo">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-service let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{service.id}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{service.name}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{service.description}}
+						</td>
+                        <td style="min-width: 14rem;">
+                            <span *ngIf="service.active===1" [class]="'customer-badge status-qualified'">
+                                Activo
+                            </span>
+                            <span *ngIf="service.active!==1" [class]="'customer-badge status-unqualified'">
+                                Inactivo
+                            </span>
+						</td>
+                        <td style="min-width: 14rem;">
+							{{service.host}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{service.port}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{service.path}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{service.moduleId.name}}
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar servicio" (click)="editService(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado servicios del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando servicios del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar servicio" icon="pi pi-plus" class="mr-2 mb-2" (click)="createService()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="serviceForm" (ngSubmit)="saveService()">
+    <div class="user-profile">
+        <p-dialog header="{{newService?'REGISTRO DE NUEVO SERVICIO':'EDICION DE SERVICIO'}}" [(visible)]="showDlgService" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}" 
+                  [closable]="false">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <span class="p-float-label">
+                            <input type="text" 
+                                    id="serviceId" 
+                                    pInputText 
+                                    formControlName="serviceId"
+                                    readonly="true">
+                            <label for="serviceId">Identificador</label>
+                        </span>
+                        <div id="daysOfValidityErrors" class="info-message">
+                            <p-message severity="info" text="Se asgina automaticamente al guardar"></p-message>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <span class="p-float-label">
+                            <input type="text" 
+                                    id="name"
+                                    pInputText 
+                                    formControlName="name">
+                            <label for="name">Nombre</label>
+                        </span>
+                        <div>
+                            <ng-container *ngFor="let message of errorMessages.name">
+                                <div id="nameErrors" class="error-message" *ngIf="serviceForm.get('name').hasError(message.type)
+                                && (serviceForm.get('name').dirty || serviceForm.get('name').touched)">
+                                    <p-message severity="error" text="{{message.message}}"></p-message>
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <span class="p-float-label">
+                            <input type="text" 
+                                    id="host"
+                                    pInputText 
+                                    formControlName="host">
+                            <label for="host">Host</label>
+                        </span>
+                        <div>
+                            <ng-container *ngFor="let message of errorMessages.host">
+                                <div id="hostErrors" class="error-message" *ngIf="serviceForm.get('host').hasError(message.type)
+                                && (serviceForm.get('host').dirty || serviceForm.get('host').touched)">
+                                    <p-message severity="error" text="{{message.message}}"></p-message>
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <span class="p-float-label">
+                            <input type="text" 
+                                    id="port"
+                                    pInputText 
+                                    formControlName="port">
+                            <label for="port">Puerto</label>
+                        </span>
+                        <div>
+                            <ng-container *ngFor="let message of errorMessages.port">
+                                <div id="portErrors" class="error-message" *ngIf="serviceForm.get('port').hasError(message.type)
+                                && (serviceForm.get('port').dirty || serviceForm.get('port').touched)">
+                                    <p-message severity="error" text="{{message.message}}"></p-message>
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <span class="p-float-label">
+                            <input type="text" 
+                                    id="path"
+                                    pInputText 
+                                    formControlName="path">
+                            <label for="path">Path</label>
+                        </span>
+                        <div>
+                            <ng-container *ngFor="let message of errorMessages.path">
+                                <div id="pathErrors" class="error-message" *ngIf="serviceForm.get('path').hasError(message.type)
+                                && (serviceForm.get('path').dirty || serviceForm.get('path').touched)">
+                                    <p-message severity="error" text="{{message.message}}"></p-message>
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <span class="p-float-label">
+                            <p-dropdown [autoDisplayFirst]="false"
+                                        inputId="moduleId" 
+                                        [options]="modules" 
+                                        optionLabel="name"
+                                        optionValue="moduleId"
+                                        formControlName="moduleId"
+                                        appendTo="body"></p-dropdown>
+                            <label for="moduleId">Modulo</label>
+                        </span>
+                        <div>
+                            <ng-container *ngFor="let message of errorMessages.moduleId">
+                                <div id="moduleIdErrors" class="error-message" *ngIf="serviceForm.get('moduleId').hasError(message.type)
+                                && (serviceForm.get('moduleId').dirty || serviceForm.get('moduleId').touched)">
+                                    <p-message severity="error" text="{{message.message}}"></p-message>
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                    <div class="field col-12">
+                        <p-toggleButton formControlName="serviceStatus"
+                                        [offLabel]="'Servicio inactivo'" 
+                                        [onLabel]="'Servicio activo'"
+                                        [offIcon]="'pi pi-times'"
+                                        [onIcon]="'pi pi-refresh'">
+                        </p-toggleButton>
+                        <div>
+                            <ng-container *ngFor="let message of errorMessages.serviceStatus">
+                                <div id="serviceStatusErrors" class="error-message" *ngIf="menulinkForm.get('serviceStatus').hasError(message.type)
+                                && (menulinkForm.get('serviceStatus').dirty || menulinkForm.get('serviceStatus').touched)">
+                                    <p-message severity="error" text="{{message.message}}"></p-message>
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                    <div class="field col-12">
+                        <span class="p-float-label">
+                            <textarea type="text" 
+                                    id="description"
+                                    pInputText 
+                                    formControlName="description">
+                            </textarea>
+                            <label for="description">Descripcion</label>
+                        </span>
+                        <div>
+                            <ng-container *ngFor="let message of errorMessages.description">
+                                <div id="descriptionErrors" class="error-message" *ngIf="serviceForm.get('description').hasError(message.type)
+                                && (serviceForm.get('description').dirty || serviceForm.get('description').touched)">
+                                    <p-message severity="error" text="{{message.message}}"></p-message>
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgService=false; loadingTable=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!serviceForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>

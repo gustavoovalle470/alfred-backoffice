@@ -1,0 +1,252 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5 align="center" style="font-weight: bold;">CONFIGURACIONES DE SISTEMA</h5>
+			<p-table #dt1 [value]="moduleConfigs" dataKey="moduleConfigurationId" [rows]="10" 
+                    [loading]="loadingTable" [rowHover]="true" styleClass="p-datatable-gridlines" 
+                    [paginator]="true" 
+                    [globalFilterFields]="['name','country.name','representative.name','status']" 
+                    responsiveLayout="scroll">
+				<ng-template pTemplate="header">
+					<tr>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								ID
+								<p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="moduleConfigurationId" 
+                                                display="menu" 
+                                                placeholder="Buscar por ID">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								NOMBRE
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="name" 
+                                                display="menu" 
+                                                placeholder="Buscar por nombre">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								TIPO DE DATO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="type" 
+                                                display="menu" 
+                                                placeholder="Buscar por tipo">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+								VALOR ACTUAL
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="value" 
+                                                display="menu" 
+                                                placeholder="Buscar por valor">
+                                </p-columnFilter>
+							</div>
+						</th>
+						<th>
+							<div class="flex justify-content-between align-items-center">
+								MÓDULO
+                                <p-columnFilter [showMatchModes]="false" 
+                                                [showOperator]="false" 
+                                                [showAddButton]="false" 
+                                                type="text" 
+                                                field="module" 
+                                                display="menu" 
+                                                placeholder="Buscar por módulo">
+                                </p-columnFilter>
+							</div>
+						</th>
+                        <th>
+							<div class="flex justify-content-between align-items-center">
+                                ACCIONES
+							</div>
+						</th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-mconfiguration let-index>
+					<tr>
+						<td style="min-width: 12rem;">
+							{{mconfiguration.moduleConfigurationId}}
+						</td>
+						<td style="min-width: 14rem;">
+							{{mconfiguration.name}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{mconfiguration.type}}
+						</td>
+                        <td style="min-width: 14rem;">
+							{{mconfiguration.value}}
+						</td>
+						<td style="min-width: 10rem;">
+							{{mconfiguration.module}}
+						</td>
+                        <td>
+                            <p-button type="button" class="mr-2 mb-2" icon="pi pi-pencil" pTooltip="Editar configuracion" (click)="editConfiguration(index)"></p-button>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="7">No se han cargado configuraciones del sistema.</td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="loadingbody">
+					<tr>
+						<td colspan="7">Cargando configuraciones del sistema, espere un momento.</td>
+					</tr>
+				</ng-template>
+    		</p-table>
+            <div align="center">
+                <button pButton pRipple label="Adicionar configuracion" icon="pi pi-plus" class="mr-2 mb-2" (click)="createConfiguration()"></button>
+                <button pButton pRipple label="Regresar al inicio" icon="pi pi-home" class="mr-2 mb-2" [routerLink]="['/alfred/dashboard']"></button>
+            </div>
+		</div>
+	</div>
+</div>
+<form [formGroup]="moduleConfigForm" (ngSubmit)="saveConfiguration()">
+    <div class="user-profile">
+        <p-dialog header="{{newConfig?'REGISTRO DE NUEVA CONFIGURACION':'EDICION DE CONFIGURACION'}}" [(visible)]="showDlgConfigs" 
+                  modal="modal" showEffect="fade" [style]="{width: '50vw'}" [breakpoints]="{'960px': '75vw'}"
+                  [closable]="true">
+            <div class="card">
+                <div class="p-fluid p-formgrid grid">             
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="moduleConfigurationId" 
+                                            pInputText 
+                                            formControlName="moduleConfigurationId"
+                                            style="text-transform:uppercase">
+                                    <label for="moduleConfigurationId">ID</label>
+                                </span>
+                                <div id="daysOfValidityErrors" class="info-message">
+                                    <p-message severity="info" text="{{newConfig?'Se asgina automaticamente al guardar':'No se puede modificar'}}"></p-message>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="name" 
+                                            pInputText 
+                                            formControlName="name"
+                                            style="text-transform:uppercase">
+                                    <label for="name">Nombre</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.name">
+                                        <div id="nameErrors" class="error-message" *ngIf="moduleConfigForm.get('name').hasError(message.type)
+                                        && (moduleConfigForm.get('name').dirty || moduleConfigForm.get('name').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <p-dropdown [autoDisplayFirst]="false"
+                                                inputId="type" 
+                                                [options]="allowConfigTypes" 
+                                                optionLabel="id"
+                                                optionValue="id"
+                                                formControlName="type"
+                                                (onChange)="changeValueValidator()"></p-dropdown>
+                                    <label for="type">Tipo de dato</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.type">
+                                        <div id="typeErrors" class="error-message" *ngIf="moduleConfigForm.get('type').hasError(message.type)
+                                        && (moduleConfigForm.get('type').dirty || moduleConfigForm.get('type').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <input type="text" 
+                                            id="module" 
+                                            pInputText 
+                                            formControlName="module"
+                                            style="text-transform:uppercase">
+                                    <label for="module">Módulo</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.module">
+                                        <div id="moduleErrors" class="error-message" *ngIf="moduleConfigForm.get('module').hasError(message.type)
+                                        && (moduleConfigForm.get('module').dirty || moduleConfigForm.get('module').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>        
+                    <div class="field col-12">
+                        <div class="grid p-fluid mt-3">
+                            <div class="field col-12">
+                                <span class="p-float-label">
+                                    <textarea type="text" 
+                                            id="value" 
+                                            rows="9"
+                                            pInputText 
+                                            formControlName="value"></textarea>
+                                    <label for="value">Valor actual</label>
+                                </span>
+                                <div>
+                                    <ng-container *ngFor="let message of errorMessages.value">
+                                        <div id="valueErrors" class="error-message" *ngIf="moduleConfigForm.get('value').hasError(message.type)
+                                        && (moduleConfigForm.get('value').dirty || moduleConfigForm.get('value').touched)">
+                                            <p-message severity="error" text="{{message.message}}"></p-message>
+                                            <ion-icon name="information-circle-outline"></ion-icon>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ng-template pTemplate="footer">
+                    <button pButton icon="pi pi-times" (click)="showDlgConfigs=false" label="Cancelar" class="p-button-outlined"></button>
+                    <button pButton icon="pi pi-check" type="submit" [disabled]="!moduleConfigForm.valid" label="Guardar" class="p-button-outlined"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</form>
